@@ -6,8 +6,8 @@ public class MazeGenerator : MonoBehaviour
 {
     public GameObject floorPrefab;
     public GameObject wallPrefab;
-    public int width = 5;
-    public int height = 5;
+    public int width = 7;
+    public int height = 7;
 
     private HashSet<Vector2Int> path = new HashSet<Vector2Int>();
 
@@ -49,7 +49,7 @@ public class MazeGenerator : MonoBehaviour
                 Vector2Int current = new Vector2Int(x, y);
 
                 // 通路として確保したマス以外にランダムで壁を置く
-                if (!path.Contains(current) && Random.value > 0.7f)
+                if (!path.Contains(current) && Random.value > 0.5f)
                 {
                     Instantiate(wallPrefab, pos, Quaternion.identity, transform);
                 }
