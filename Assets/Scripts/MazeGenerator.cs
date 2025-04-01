@@ -14,27 +14,66 @@ public class MazeGenerator : MonoBehaviour
 
     void Start()
     {
-        GenerateGuaranteedPath();
+        GenerateBacktrackPath();
         GenerateMaze();
     }
 
-    void GenerateGuaranteedPath()
+    void GenerateBacktrackPath()
     {
-        // スタートからゴールまで1本道を確保（右 or 上に進む）
-        int x = 0, y = 0;
-        path.Add(new Vector2Int(x, y));
+        path.Clear();
 
-        while (x < width - 1 || y < height - 1)
+        bool[,] visited = new bool[width, height];
+        Stack<Vector2Int> stack = new Stack<Vector2Int>();
+
+        Vector2Int current = new Vector2Int(0, 0);
+        visited[current.x, current.y] = true;
+        path.Add(current);
+        stack.Push(current);
+
+        while (stack.Count > 0)
         {
-            if (x < width - 1 && (y == height - 1 || Random.value > 0.5f))
+            current = stack.Peek();
+            if (current == new Vector2Int(width - 1, height - 1))
             {
-                x++; // 右へ
+                break; // ゴールに着いたら探索終了！
+            }
+
+            List<Vector2Int> neighbors = new List<Vector2Int>();
+
+            // 隣のマス（未訪問のみ）
+            Vector2Int[] directions = {
+                Vector2Int.right,
+                Vector2Int.left,
+                Vector2Int.up,
+                Vector2Int.down
+            };
+
+            foreach (var dir in directions)
+            {
+                Vector2Int next = current + dir;
+
+                if (next.x >= 0 && next.x < width &&
+                    next.y >= 0 && next.y < height &&
+                    !visited[next.x, next.y])
+                {
+                    neighbors.Add(next);
+                }
+            }
+
+            if (neighbors.Count > 0)
+            {
+                // ランダムに1マス選んで進む
+                Vector2Int chosen = neighbors[Random.Range(0, neighbors.Count)];
+
+                visited[chosen.x, chosen.y] = true;
+                path.Add(chosen);
+                stack.Push(chosen);
             }
             else
             {
-                y++; // 上へ
+                // 行き止まりなので1つ戻る
+                stack.Pop();
             }
-            path.Add(new Vector2Int(x, y));
         }
     }
 
@@ -50,7 +89,7 @@ public class MazeGenerator : MonoBehaviour
                 bool isPath = path.Contains(current); // 1本道の通路
 
                 // 通路 or ランダムで壁なし
-                bool placeWall = !isPath && Random.value > 0.5f;
+                bool placeWall = !isPath && Random.value > 0.0f;
 
                 walkable[x, y] = !placeWall;
 
